@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: spring-gotenberg-reports
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+  thymeleaf:
+    cache: true
+
+gotenberg:
+  url: http://localhost:3000
+  connect-timeout: 2s
+  # Gotenberg replies only when the PDF is done; keep this above its --api-timeout (30s by default).
+  read-timeout: 35s
+  retry:
+    max-retries: 2
+    initial-delay: 300ms
+    multiplier: 2.0
+    max-delay: 3s
+
+reports:
+  combined:
+    concurrency: 4
+    max-concurrency: 8
+    max-sections: 200
+    timeout: 2m
+    heartbeat: 5s
+    retention: 15m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    distribution:
+      percentiles:
+        gotenberg.requests: 0.5,0.95
