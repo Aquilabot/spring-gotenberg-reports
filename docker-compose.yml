@@ -1,0 +1,28 @@
+services:
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    command:
+      - gotenberg
+      - --api-timeout=30s
+      - --chromium-max-concurrency=6
+      - --log-std-format=json
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # Not published on purpose: only the app talks to Gotenberg.
+    # Uncomment to call it from the host while working on templates.
+    # ports:
+    #   - "3000:3000"
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      GOTENBERG_URL: http://gotenberg:3000
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+    depends_on:
+      gotenberg:
+        condition: service_healthy
