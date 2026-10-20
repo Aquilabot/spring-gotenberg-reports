@@ -161,7 +161,8 @@ public class GotenbergClient implements PdfEngine {
         try {
             return call.get();
         } catch (GotenbergException e) {
-            outcome = e.status() == 0 ? "io_error" : e.status() < 500 ? "client_error" : "server_error";
+            outcome = Thread.currentThread().isInterrupted() ? "cancelled"
+                    : e.status() == 0 ? "io_error" : e.status() < 500 ? "client_error" : "server_error";
             throw e;
         } finally {
             // Gotenberg sends headers only after the PDF is rendered, so this measures the conversion.
