@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Combined report</title>
+  <style>
+    :root { --ink: #1d2430; --muted: #5b6472; --accent: #1f5f8b; --bad: #a33; --bg: #f6f7f9; }
+    body { margin: 0; font: 15px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+    main { max-width: 42rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    p { color: var(--muted); margin-top: 0; }
+    form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin: 1.5rem 0; }
+    label { display: grid; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
+    input { width: 7rem; padding: 0.4rem; font: inherit; }
+    button { padding: 0.45rem 1rem; font: inherit; border: 0; border-radius: 4px; background: var(--accent); color: #fff; cursor: pointer; }
+    button[disabled] { opacity: 0.5; cursor: default; }
+    button.secondary { background: #fff; color: var(--ink); border: 1px solid #c9ced6; }
+    progress { width: 100%; height: 0.75rem; }
+    #status { font-weight: 600; margin: 0.5rem 0; }
+    #status.failed { color: var(--bad); }
+    ol { padding-left: 1.25rem; font: 13px/1.6 ui-monospace, monospace; color: var(--muted); max-height: 18rem; overflow: auto; }
+    .links a { margin-right: 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Combined report</h1>
+  <p>One portfolio summary plus one statement per account, rendered in parallel by Gotenberg and merged into a
+    single PDF. All data is synthetic.</p>
+
+  <form id="start">
+    <label>Accounts
+      <input name="accounts" type="number" min="1" th:max="${job.maxSections}" value="12">
+    </label>
+    <label>Concurrency
+      <input name="concurrency" type="number" min="1" th:max="${job.maxConcurrency}" th:value="${job.concurrency}" value="4">
+    </label>
+    <button type="submit">Generate</button>
+    <button type="button" id="cancel" class="secondary" disabled>Cancel</button>
+  </form>
+
+  <progress id="progress" max="1" value="0"></progress>
+  <div id="status">Idle</div>
+  <ol id="log"></ol>
+
+  <p class="links">Single documents:
+    <a href="/api/reports/invoice/7">Invoice</a>
+    <a href="/api/reports/statement/3">Statement</a>
+    <a href="/preview/statement/3">Statement (HTML preview)</a>
+  </p>
+</main>
+
+<script>
+  const form = document.getElementById('start');
+  const cancel = document.getElementById('cancel');
+  const progress = document.getElementById('progress');
+  const status = document.getElementById('status');
+  const log = document.getElementById('log');
+  let source = null;
+
+  function show(text, failed = false) {
+    status.textContent = text;
+    status.className = failed ? 'failed' : '';
+  }
+
+  function append(text) {
+    const item = document.createElement('li');
+    item.textContent = text;
+    log.append(item);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function stop() {
+    if (source) source.close();
+    source = null;
+    form.querySelector('button[type=submit]').disabled = false;
+    cancel.disabled = true;
+  }
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    stop();
+    log.replaceChildren();
+    progress.value = 0;
+    const params = new URLSearchParams(new FormData(form));
+    source = new EventSource('/api/combined-reports/stream?' + params);
+    form.querySelector('button[type=submit]').disabled = true;
+    cancel.disabled = false;
+    const started = performance.now();
+
+    source.addEventListener('queued', e => {
+      const data = JSON.parse(e.data);
+      progress.max = data.sections + 1;
+      show(`Queued ${data.sections} sections`);
+      append(`queued job ${data.jobId}`);
+    });
+    source.addEventListener('rendering', e => {
+      const data = JSON.parse(e.data);
+      progress.value = data.completed;
+      show(`Rendering ${data.completed}/${data.total}`);
+      append(`rendered ${data.section}`);
+    });
+    source.addEventListener('merging', e => {
+      show(`Merging ${JSON.parse(e.data).sections} PDFs`);
+    });
+    source.addEventListener('done', e => {
+      const data = JSON.parse(e.data);
+      progress.value = progress.max;
+      show(`Done in ${(data.elapsedMillis / 1000).toFixed(1)} s (${(data.bytes / 1024).toFixed(0)} KiB)`);
+      const link = document.createElement('a');
+      link.href = data.downloadUrl;
+      link.textContent = 'Download PDF';
+      status.append(' ', link);
+      stop();
+    });
+    source.addEventListener('failed', e => {
+      show('Failed: ' + JSON.parse(e.data).reason, true);
+      stop();
+    });
+    // Connection errors. Without this EventSource would reconnect and start a second job.
+    source.onerror = () => {
+      if (source) {
+        show('Connection lost after ' + ((performance.now() - started) / 1000).toFixed(1) + ' s', true);
+        stop();
+      }
+    };
+  });
+
+  // Closing the stream is the cancel signal: the server notices on its next write and stops the job.
+  cancel.addEventListener('click', () => {
+    stop();
+    show('Cancelled', true);
+  });
+</script>
+</body>
+</html>
