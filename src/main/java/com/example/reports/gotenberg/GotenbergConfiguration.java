@@ -22,8 +22,8 @@ public class GotenbergConfiguration {
         RestClient client = restClient(builder, properties);
         return () -> {
             try {
-                String body = client.get().uri("/health").retrieve().body(String.class);
-                return Health.up().withDetail("url", properties.url().toString()).withDetail("gotenberg", body).build();
+                client.get().uri("/health").retrieve().toBodilessEntity();
+                return Health.up().withDetail("url", properties.url().toString()).build();
             } catch (RuntimeException e) {
                 return Health.down(e).withDetail("url", properties.url().toString()).build();
             }
