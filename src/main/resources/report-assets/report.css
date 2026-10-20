@@ -1,0 +1,103 @@
+/* Print stylesheet shared by all reports. Gotenberg uploads it next to index.html. */
+
+@font-face {
+  font-family: "Report Sans";
+  src: url("NotoSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Report Sans";
+  src: url("NotoSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+}
+
+/* Page geometry lives here (Gotenberg is called with preferCssPageSize=true).
+   Top and bottom margins leave room for the running header and footer. */
+@page {
+  size: A4;
+  margin: 22mm 16mm 18mm 16mm;
+}
+
+:root {
+  --ink: #1d2430;
+  --muted: #5b6472;
+  --rule: #d9dde3;
+  --accent: #1f5f8b;
+  --accent-soft: #e3eef6;
+  --credit: #217a45;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Report Sans", sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.4;
+  color: var(--ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+h1 { margin: 0; font-size: 18pt; color: var(--accent); }
+
+.muted { color: var(--muted); }
+.strong { font-weight: 700; }
+.nowrap { white-space: nowrap; }
+
+.letterhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 4mm;
+  margin-bottom: 6mm;
+  border-bottom: 1.5pt solid var(--accent);
+}
+.letterhead .issuer { font-weight: 700; font-size: 12pt; }
+.letterhead .heading { text-align: right; }
+.badge {
+  display: inline-block;
+  margin-top: 2mm;
+  padding: 0.5mm 2mm;
+  border: 0.75pt solid var(--accent);
+  border-radius: 2mm;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.parties { display: flex; justify-content: space-between; align-items: flex-start; gap: 10mm; margin-bottom: 6mm; }
+.party { font-style: normal; }
+.label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+
+.facts { display: grid; grid-template-columns: auto auto; gap: 1mm 6mm; margin: 0; }
+.facts.wide { grid-template-columns: repeat(3, auto auto); margin-bottom: 6mm; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; text-align: right; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: 700; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.lines thead { display: table-header-group; } /* repeat the header row on every page */
+.lines th { background: var(--accent-soft); padding: 1.5mm 2mm; font-size: 8.5pt; }
+.lines td { padding: 1.2mm 2mm; border-bottom: 0.5pt solid var(--rule); }
+.lines tr { break-inside: avoid; }
+.credit { color: var(--credit); }
+
+.totals { width: 45%; margin: 5mm 0 0 auto; break-inside: avoid; }
+.totals th, .totals td { padding: 1.2mm 2mm; }
+.totals .grand { border-top: 1pt solid var(--ink); font-size: 11pt; }
+.totals .grand th, .totals .grand td { font-weight: 700; }
+
+.chart-box { margin: 0 0 6mm; break-inside: avoid; }
+.chart-box figcaption { font-size: 8.5pt; color: var(--muted); margin-bottom: 1mm; }
+.chart { width: 100%; height: auto; display: block; }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+.chart .area { fill: var(--accent-soft); stroke: none; }
+.chart .bar { fill: var(--accent); }
+.chart .axis { font-size: 9px; fill: var(--muted); }
+
+.note { margin-top: 6mm; font-size: 8.5pt; color: var(--muted); break-inside: avoid; }

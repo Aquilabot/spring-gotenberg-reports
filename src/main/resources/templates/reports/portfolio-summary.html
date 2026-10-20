@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{reports/fragments :: head}"></head>
+<body>
+<header th:replace="~{reports/fragments :: letterhead(${report.bank}, 'Portfolio summary', ${fmt.month(report.period)})}"></header>
+
+<dl class="facts wide">
+  <dt>Accounts</dt><dd th:text="${report.statements.size()}">0</dd>
+  <dt>Transactions</dt><dd th:text="${report.transactionCount}">0</dd>
+  <dt>Total closing balance</dt><dd class="strong" th:text="${fmt.money(report.totalClosing)}">0.00</dd>
+</dl>
+
+<figure class="chart-box">
+  <figcaption>Closing balance per account</figcaption>
+  <svg th:replace="~{reports/fragments :: bar-chart(${report.closingChart})}"></svg>
+</figure>
+
+<table class="lines">
+  <thead>
+  <tr><th>#</th><th>Account</th><th>Holder</th><th class="num">Opening</th><th class="num">Closing</th></tr>
+  </thead>
+  <tbody>
+  <tr th:each="s, it : ${report.statements}">
+    <td th:text="${it.count}">1</td>
+    <td class="nowrap" th:text="${s.accountNumber}">XX00</td>
+    <td th:text="${s.holder.name}">Name</td>
+    <td class="num" th:text="${fmt.money(s.openingBalance)}">0.00</td>
+    <td class="num" th:text="${fmt.money(s.closingBalance)}">0.00</td>
+  </tr>
+  </tbody>
+</table>
+<p class="note">One statement per account follows this page.</p>
+</body>
+</html>

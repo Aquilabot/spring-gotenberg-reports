@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<!--
+  Chromium prints this in the top margin of every page. It is rendered in isolation:
+  no external stylesheets or web fonts, so styles stay inline and sizes are explicit.
+-->
+<head>
+  <meta charset="utf-8">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    .bar { box-sizing: border-box; width: 100%; padding: 9mm 16mm 1.5mm; display: flex; justify-content: space-between;
+           font-family: sans-serif; font-size: 8pt; color: #5b6472; border-bottom: 0.5pt solid #c9ced6; }
+  </style>
+</head>
+<body>
+<div class="bar">
+  <span th:text="${report.title}">Title</span>
+  <span>Synthetic data. Not a real document.</span>
+</div>
+</body>
+</html>

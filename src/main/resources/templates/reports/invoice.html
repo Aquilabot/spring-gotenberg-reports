@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{reports/fragments :: head}"></head>
+<body>
+<header th:replace="~{reports/fragments :: letterhead(${report.seller}, 'Invoice', ${report.number})}"></header>
+
+<section class="parties">
+  <address th:replace="~{reports/fragments :: party('Bill to', ${report.customer})}"></address>
+  <dl class="facts">
+    <dt>Invoice number</dt><dd th:text="${report.number}">INV-1</dd>
+    <dt>Issued</dt><dd th:text="${fmt.date(report.issued)}">1 Sep 2026</dd>
+    <dt>Due</dt><dd th:text="${fmt.date(report.due)}">1 Oct 2026</dd>
+  </dl>
+</section>
+
+<table class="lines">
+  <thead>
+  <tr><th>SKU</th><th>Description</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr>
+  </thead>
+  <tbody>
+  <tr th:each="line : ${report.lines}">
+    <td th:text="${line.sku}">SKU</td>
+    <td th:text="${line.description}">Item</td>
+    <td class="num" th:text="${line.quantity}">1</td>
+    <td class="num" th:text="${fmt.money(line.unitPrice)}">0.00</td>
+    <td class="num" th:text="${fmt.money(line.amount)}">0.00</td>
+  </tr>
+  </tbody>
+</table>
+
+<table class="totals">
+  <tr><th>Subtotal</th><td class="num" th:text="${fmt.money(report.subtotal)}">0.00</td></tr>
+  <tr><th th:text="|Tax (${report.taxPercent})|">Tax</th><td class="num" th:text="${fmt.money(report.tax)}">0.00</td></tr>
+  <tr class="grand"><th>Total due</th><td class="num" th:text="${fmt.money(report.total)}">0.00</td></tr>
+</table>
+
+<p class="note">Payment terms: 30 days. This invoice was generated from synthetic data for demonstration purposes;
+  no goods were sold and no payment is due.</p>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<!-- Shared building blocks for the printable reports. -->
+
+<head th:fragment="head">
+  <meta charset="utf-8">
+  <title th:text="${report.title}">Report</title>
+  <base th:if="${!#strings.isEmpty(assetBase)}" th:href="${assetBase}">
+  <link rel="stylesheet" href="report.css">
+</head>
+
+<body>
+
+<header th:fragment="letterhead(issuer, heading, subtitle)" class="letterhead">
+  <div>
+    <div class="issuer" th:text="${issuer.name}">Issuer</div>
+    <div class="muted" th:text="|${issuer.street}, ${issuer.city}|">Street, City</div>
+    <div class="muted" th:text="${issuer.email}">mail@company.example</div>
+  </div>
+  <div class="heading">
+    <h1 th:text="${heading}">Heading</h1>
+    <div class="muted" th:text="${subtitle}">Subtitle</div>
+    <div class="badge">Synthetic data</div>
+  </div>
+</header>
+
+<address th:fragment="party(label, party)" class="party">
+  <div class="label" th:text="${label}">Label</div>
+  <strong th:text="${party.name}">Name</strong><br>
+  <span th:text="${party.street}">Street</span><br>
+  <span th:text="${party.city}">City</span><br>
+  <span class="muted" th:text="${party.email}">mail@example.example</span>
+</address>
+
+<svg th:fragment="line-chart(chart)" class="chart" th:viewBox="|0 0 ${chart.width} ${chart.height}|"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Balance over the period">
+  <polygon class="area" th:points="${chart.area}"/>
+  <polyline class="line" th:points="${chart.line}"/>
+  <text th:each="label : ${chart.yLabels}" class="axis" text-anchor="end"
+        th:x="${label.x}" th:y="${label.y}" th:text="${label.text}">0</text>
+  <text th:each="label, it : ${chart.xLabels}" class="axis"
+        th:attr="text-anchor=${it.first ? 'start' : (it.last ? 'end' : 'middle')}"
+        th:x="${label.x}" th:y="${label.y}" th:text="${label.text}">day</text>
+</svg>
+
+<svg th:fragment="bar-chart(chart)" class="chart" th:viewBox="|0 0 ${chart.width} ${chart.height}|"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Closing balance per account">
+  <g th:each="bar : ${chart.bars}">
+    <text class="axis" x="0" th:y="${bar.y + 12}" th:text="${bar.label}">Name</text>
+    <rect class="bar" th:x="${chart.labelWidth}" th:y="${bar.y + 3}" th:width="${bar.length}" height="12" rx="2"/>
+    <text class="axis" th:x="${chart.labelWidth + bar.length + 6}" th:y="${bar.y + 12}" th:text="${bar.value}">0.00</text>
+  </g>
+</svg>
+
+</body>
+</html>

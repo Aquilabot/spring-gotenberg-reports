@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<!-- Chromium fills .pageNumber and .totalPages when it prints this footer. -->
+<head>
+  <meta charset="utf-8">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    .bar { box-sizing: border-box; width: 100%; padding: 5mm 16mm 0; display: flex; justify-content: space-between;
+           font-family: sans-serif; font-size: 8pt; color: #5b6472; }
+  </style>
+</head>
+<body>
+<div class="bar">
+  <span th:text="${report.filename}">file.pdf</span>
+  <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+</div>
+</body>
+</html>

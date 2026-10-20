@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{reports/fragments :: head}"></head>
+<body>
+<header th:replace="~{reports/fragments :: letterhead(${report.bank}, 'Account statement', ${fmt.month(report.period)})}"></header>
+
+<section class="parties">
+  <address th:replace="~{reports/fragments :: party('Account holder', ${report.holder})}"></address>
+  <dl class="facts">
+    <dt>Account</dt><dd th:text="${report.accountNumber}">XX00</dd>
+    <dt>Opening balance</dt><dd th:text="${fmt.money(report.openingBalance)}">0.00</dd>
+    <dt>Money in</dt><dd th:text="${fmt.money(report.credits)}">0.00</dd>
+    <dt>Money out</dt><dd th:text="${fmt.money(report.debits)}">0.00</dd>
+    <dt>Closing balance</dt><dd class="strong" th:text="${fmt.money(report.closingBalance)}">0.00</dd>
+  </dl>
+</section>
+
+<figure class="chart-box">
+  <figcaption>Daily balance</figcaption>
+  <svg th:replace="~{reports/fragments :: line-chart(${report.balanceChart})}"></svg>
+</figure>
+
+<table class="lines">
+  <thead>
+  <tr><th>Date</th><th>Description</th><th>Reference</th><th class="num">Amount</th><th class="num">Balance</th></tr>
+  </thead>
+  <tbody>
+  <tr th:each="tx : ${report.transactions}">
+    <td class="nowrap" th:text="${fmt.date(tx.date)}">1 Sep 2026</td>
+    <td th:text="${tx.description}">Description</td>
+    <td class="muted" th:text="${tx.reference}">REF</td>
+    <td class="num" th:classappend="${tx.credit} ? 'credit'" th:text="${fmt.money(tx.amount)}">0.00</td>
+    <td class="num" th:text="${fmt.money(tx.balance)}">0.00</td>
+  </tr>
+  </tbody>
+</table>
+
+<p class="note" th:text="|Closing balance on ${fmt.date(report.period.atEndOfMonth())}: ${fmt.money(report.closingBalance)}|">Closing</p>
+</body>
+</html>
