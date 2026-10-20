@@ -47,9 +47,8 @@ Choices and why:
 
 - **Spring MVC on virtual threads** (`spring.threads.virtual.enabled=true`). The work is
   "render a string, upload it, wait for Chromium". With virtual threads that blocking code is cheap,
-  stays easy to read and debug, and `SseEmitter` covers streaming. WebFlux would add a second
-  programming model for no throughput gain at Gotenberg's scale (it converts at most 6 pages at once
-  by default).
+  stays easy to read and debug, and `SseEmitter` covers streaming. Throughput is set by
+  Gotenberg, which runs at most 6 conversions at once by default.
 - **`RestClient` on the JDK `HttpClient`.** A blocked call is aborted when its thread is interrupted,
   so cancelling a job really stops its in-flight conversions.
 - **Retries** use Spring Framework 7's `RetryTemplate` with exponential backoff. Only transport errors,
@@ -202,7 +201,7 @@ Combined report with 24 statements plus a summary (25 sections, 83 pages, 1.2 MB
 | 6 | 1.33 s | 1228 1265 1492 1396 1332 |
 | 8 | 1.38 s | 1378 1514 1170 1393 1274 |
 
-Over that session the mean Gotenberg conversion was 233 ms per section and the mean merge 37 ms.
+Over that session the mean HTML conversion took 233 ms and the mean merge 37 ms.
 One run with 200 accounts at concurrency 6 produced 684 pages (9.3 MB) in 11.8 s.
 
 What the numbers say: parallelism pays off up to about 4 concurrent sections and flattens at 6, which
@@ -215,8 +214,8 @@ Gotenberg replicas, not more threads. Runs with the same setting differ by about
 - Page numbers in a combined report restart in every section ("Page 1 of 3" per statement), because
   each section is printed separately. Global numbering would need a second pass, for example stamping
   numbers onto the merged PDF.
-- Each section embeds its own font subset, so a merged PDF carries the fonts once per section. That is
-  most of the 1.2 MB for 83 pages.
+- Each section embeds its own font subset, so a merged PDF carries the fonts once per section. That
+  is a large share of the 1.2 MB for 83 pages.
 - Finished PDFs and job state live on local disk and in memory. With more than one app instance you
   need sticky sessions or shared storage (S3 or similar) and a shared job registry.
 - No authentication. The actuator health endpoint shows details. Put both behind your usual security
