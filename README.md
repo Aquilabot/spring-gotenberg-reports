@@ -5,6 +5,9 @@ stylesheet. [Gotenberg](https://gotenberg.dev) (headless Chromium behind an HTTP
 PDF. Long reports are split into sections, rendered in parallel and merged, and the browser follows
 progress over Server-Sent Events.
 
+I wrote this after leading a migration from JasperReports to HTML templates rendered by Gotenberg at
+work in 2026; this repository shows that approach on a sample domain.
+
 All data in this repository is synthetic: fictional banks, invented names, `.example` e-mail domains.
 
 ## Why not JasperReports
@@ -63,6 +66,11 @@ Thymeleaf 3.1.5, Testcontainers 2.0.5, JUnit 6, PDFBox 3.0.8, Maven 3.9.16 via t
 Gotenberg 8 (8.32.0 at the time of the measurements).
 
 ## Run it
+
+```sh
+git clone https://github.com/Aquilabot/spring-gotenberg-reports.git
+cd spring-gotenberg-reports
+```
 
 With Docker only:
 
