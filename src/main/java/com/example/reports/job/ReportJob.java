@@ -9,6 +9,7 @@ public final class ReportJob {
     private final String id;
     private final AtomicReference<String> cancelReason = new AtomicReference<>();
     private volatile Future<?> execution;
+    private volatile boolean finished;
 
     ReportJob(String id) {
         this.id = id;
@@ -18,15 +19,22 @@ public final class ReportJob {
         return id;
     }
 
-    /** Stops the job; in-flight Gotenberg calls are interrupted. The first reason wins. */
+    /**
+     * Stops the job; in-flight Gotenberg calls are interrupted. The first reason wins. Has no effect
+     * once the job has produced its final event.
+     */
     public void cancel(String reason) {
-        if (cancelReason.compareAndSet(null, reason) && execution != null) {
+        if (!finished && cancelReason.compareAndSet(null, reason) && execution != null) {
             execution.cancel(true);
         }
     }
 
-    public boolean isDone() {
-        return execution != null && execution.isDone();
+    public boolean isFinished() {
+        return finished;
+    }
+
+    void markFinished() {
+        finished = true;
     }
 
     String cancelReason() {

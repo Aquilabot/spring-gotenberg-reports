@@ -126,12 +126,14 @@ public class CombinedReportService implements AutoCloseable {
                         bytes = pdf.saveTo(merged);
                     }
                     Files.move(merged, store.resultFile(job.id()), StandardCopyOption.REPLACE_EXISTING);
+                    job.markFinished();
                     emit(new JobEvent.Done("/api/combined-reports/" + job.id() + "/pdf", bytes, millisSince(started)));
                 } catch (Exception e) {
                     // An interrupt surfaces as InterruptedException, IOException or a wrapped HTTP error,
                     // so the cancel reason is the reliable signal.
                     Thread.interrupted();
                     String reason = job.cancelReason();
+                    job.markFinished();
                     outcome = reason == null ? "failed" : "cancelled";
                     if (reason == null) {
                         log.atError().setCause(e instanceof ExecutionException ? e.getCause() : e)

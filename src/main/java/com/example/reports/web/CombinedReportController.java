@@ -63,9 +63,7 @@ class CombinedReportController {
         }, Instant.now().plus(properties.heartbeat()), properties.heartbeat());
         Runnable cleanup = () -> {
             heartbeat.cancel(false);
-            if (!job.isDone()) {
-                job.cancel("client disconnected");
-            }
+            job.cancel("client disconnected");
         };
         emitter.onCompletion(cleanup);
         emitter.onTimeout(cleanup);

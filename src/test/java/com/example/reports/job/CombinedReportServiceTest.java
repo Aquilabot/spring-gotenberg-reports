@@ -65,6 +65,8 @@ class CombinedReportServiceTest {
         assertThat(received.get(received.size() - 2)).isEqualTo(new JobEvent.Merging(4));
         JobEvent.Done done = (JobEvent.Done) received.getLast();
         assertThat(done.downloadUrl()).isEqualTo("/api/combined-reports/" + job.id() + "/pdf");
+        job.cancel("client disconnected after the last event");
+        assertThat(job.cancelReason()).as("cancel after the final event is ignored").isNull();
 
         String merged = Files.readString(dir.resolve(job.id() + ".pdf"));
         assertThat(merged.lines()).containsExactly(
