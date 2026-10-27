@@ -1,5 +1,7 @@
 # spring-gotenberg-reports
 
+[![CI](https://github.com/Aquilabot/spring-gotenberg-reports/actions/workflows/ci.yml/badge.svg)](https://github.com/Aquilabot/spring-gotenberg-reports/actions/workflows/ci.yml)
+
 PDF reports in Spring Boot without JasperReports. Templates are plain Thymeleaf HTML with a print
 stylesheet. [Gotenberg](https://gotenberg.dev) (headless Chromium behind an HTTP API) turns them into
 PDF. Long reports are split into sections, rendered in parallel and merged, and the browser follows
