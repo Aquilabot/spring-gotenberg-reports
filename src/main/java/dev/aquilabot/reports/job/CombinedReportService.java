@@ -113,6 +113,7 @@ public class CombinedReportService implements AutoCloseable {
             long started = System.nanoTime();
             String outcome = "success";
             Path work = null;
+            JobEvent terminal;
             try (var ignored = MDC.putCloseable("jobId", job.id())) {
                 log.atInfo().addKeyValue("accounts", accounts).addKeyValue("concurrency", concurrency)
                         .log("Combined report started");
@@ -127,7 +128,7 @@ public class CombinedReportService implements AutoCloseable {
                     }
                     Files.move(merged, store.resultFile(job.id()), StandardCopyOption.REPLACE_EXISTING);
                     job.markFinished();
-                    emit(new JobEvent.Done("/api/combined-reports/" + job.id() + "/pdf", bytes, millisSince(started)));
+                    terminal = new JobEvent.Done("/api/combined-reports/" + job.id() + "/pdf", bytes, millisSince(started));
                 } catch (Exception e) {
                     // An interrupt surfaces as InterruptedException, IOException or a wrapped HTTP error,
                     // so the cancel reason is the reliable signal.
@@ -139,7 +140,7 @@ public class CombinedReportService implements AutoCloseable {
                         log.atError().setCause(e instanceof ExecutionException ? e.getCause() : e)
                                 .log("Combined report failed");
                     }
-                    emit(new JobEvent.Failed(reason != null ? reason : describe(e)));
+                    terminal = new JobEvent.Failed(reason != null ? reason : describe(e));
                 } finally {
                     timeout.cancel(false);
                     if (work != null) {
@@ -152,6 +153,9 @@ public class CombinedReportService implements AutoCloseable {
                             .addKeyValue("reason", job.cancelReason() == null ? "" : job.cancelReason())
                             .log("Combined report finished");
                 }
+                // The final event goes out after cleanup and metrics, so a listener that reacts to it
+                // sees the work directory gone and the job timer recorded.
+                emit(terminal);
             }
         }
 
